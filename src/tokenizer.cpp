@@ -90,5 +90,10 @@ std::vector<Token> tokenize(std::string const &line)
 	{
 		tokens.push_back(buffer);
 	}
+	if(tokens.empty())
+	{
+		buffer.type = Token::Type::OPCODE;
+		tokens.push_back(buffer);
+	}
 	return tokens;
 }

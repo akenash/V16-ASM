@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <stdexcept>
+#include <iostream>
 //
 #include "parser.hpp"
 
@@ -15,7 +16,7 @@ void Parser::parse(std::vector<Token> const &tokens)
 	}
 	Opcode opcode = stringToOpcode(tokens[i].value);
 	i++;
-	if(tokens.size() == 1)
+	if(i == tokens.size())
 	{
 		instructions.push_back(Instruction(opcode, {0x0000}, {0x0000}));
 		values.push_back({});

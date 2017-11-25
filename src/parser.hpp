@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <queue>
 #include <string>
 //
 #include <v16/architecture.hpp>
@@ -8,16 +9,21 @@
 class Parser
 {
 	public:
-	void parse(std::vector<Token> const &tokens);
+	struct Line
+	{
+		Instruction instr;
+		std::queue<Word> words;
+	};
 
-	std::vector<Word> assemble();
+	void parse(std::queue<Token> &tokens);
+
+	std::queue<Word> assemble();
 	private:
 	Opcode stringToOpcode(std::string string);
-	ModeType stringToModeType(std::string string);
+	Mode::Type stringToModeType(std::string string);
 
 	static void stringToLower(std::string &string);
 	static Word stringToWord(std::string const &string);
 	std::unordered_map<std::string, Word> identifiers;
-	std::vector<Instruction> instructions;
-	std::vector<std::vector<Word>> values;
+	std::queue<Line> lines;
 };

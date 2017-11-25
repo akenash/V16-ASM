@@ -17,10 +17,13 @@ CharType getCharType(char character)
 	}
 }
 
-std::vector<Token> tokenize(std::string const &line)
+std::queue<Token> tokenize(std::string const &line)
 {
-	std::vector<Token> tokens;
-	Token buffer = {Token::Type::IRRELEVANT, ""};
+	auto resetToken = [](Token &token) {token = {Token::Type::IRRELEVANT, ""};};
+
+	std::queue<Token> tokens;
+	Token buffer;
+	resetToken(buffer);
 
 	for(auto ch : line)
 	{
@@ -31,69 +34,61 @@ std::vector<Token> tokenize(std::string const &line)
 			if(buffer.type != Token::Type::NUMBER)
 			{
 				buffer.type = Token::Type::NUMBER;
-				buffer.value = ch;
+				buffer.value = "";
 			}
-			else
-			{
-				buffer.value += ch;
-			}
+			buffer.value += ch;
 			break;
 
 		case CharType::LETTER:
-			if(buffer.type == Token::Type::IRRELEVANT || buffer.type == Token::Type::NUMBER ||
-				buffer.type == Token::Type::IDENTIFIER)
-			{
-				buffer.value += ch;
-			}
-			else if(buffer.type == Token::Type::MODE)
+			if(buffer.value == "%")
 			{
 				buffer.type = Token::Type::IDENTIFIER;
-				buffer.value = ch;
+				buffer.value = "";
 			}
+			buffer.value += ch;
 			break;
 
 		case CharType::SIGN:
-			if(tokens.empty())
+			if(ch == '#')
+			{
+				return tokens;
+			}
+			else if(ch == '$')
+			{
+				buffer.type = Token::Type::MODE;
+				buffer.value = "$";
+				tokens.push(buffer);
+			}
+			else if(tokens.empty())
 			{
 				buffer.type = Token::Type::IDENTIFIER;
+				tokens.push(buffer);
 			}
-			else if(buffer.value == "")
-			{
-				buffer.value = ch;
-				buffer.type = Token::Type::MODE;
-			}
-			else
+			else if(buffer.value != "")
 			{
 				buffer.type = Token::Type::MODE;
+				tokens.push(buffer);
 			}
-			tokens.push_back(buffer);
-			buffer.type = Token::Type::MODE;
-			buffer.value = "";
+			resetToken(buffer);
+			if(ch == '%') buffer.value = ch;
 			break;
 
 		case CharType::IRRELEVANT:
-			if(tokens.empty())
+			if(tokens.empty() && buffer.value != "")
 			{
 				buffer.type = Token::Type::OPCODE;
-				tokens.push_back(buffer);
 			}
-			else if(buffer.type != Token::Type::IRRELEVANT && buffer.value != "")
+			if(buffer.value != "" && buffer.type != Token::Type::IRRELEVANT)
 			{
-				tokens.push_back(buffer);
+				tokens.push(buffer);
 			}
-			buffer.type = Token::Type::IRRELEVANT;
-			buffer.value = "";
+			resetToken(buffer);
 			break;
 		}
 	}
-	if(buffer.type != Token::Type::IRRELEVANT)
+	if(buffer.value != "" && buffer.type != Token::Type::IRRELEVANT)
 	{
-		tokens.push_back(buffer);
-	}
-	if(tokens.empty())
-	{
-		buffer.type = Token::Type::OPCODE;
-		tokens.push_back(buffer);
+		tokens.push(buffer);
 	}
 	return tokens;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <queue>
 
 enum class CharType
 {
@@ -14,7 +14,7 @@ enum class CharType
 const unsigned char ASCIITypes[129] =
 	"IIIIIIIIIIIIIIII" //0  - 15
 	"IIIIIIIIIIIIIIII" //16 - 31
-	"IIIISSIIIIIIIIII" //32 - 47
+	"IIISSSIIIIIIIIII" //32 - 47
 	"DDDDDDDDDDSIIIII" //48 - 63
 	"ILLLLLLLLLLLLLLL" //64 - 79
 	"LLLLLLLLLLLIIIII" //80 - 95
@@ -29,7 +29,7 @@ struct Token
 		NUMBER,
 		MODE,
 		IDENTIFIER,
-		OPCODE
+		OPCODE,
 	};
 
 	Type type;
@@ -37,4 +37,4 @@ struct Token
 };
 
 CharType getCharType(char character);
-std::vector<Token> tokenize(std::string const &line);
+std::queue<Token> tokenize(std::string const &line);

@@ -1,112 +1,108 @@
 #include <cctype>
 #include <cstdlib>
 #include <stdexcept>
-#include <iostream>
 //
 #include "parser.hpp"
 
-void Parser::parse(std::vector<Token> const &tokens)
+void Parser::parse(std::queue<Token> &tokens)
 {
-	unsigned i = 0;
 	if(tokens.empty()) return;
 	if(tokens.front().type == Token::Type::IDENTIFIER)
 	{
-		identifiers[tokens[0].value] = stringToWord(tokens[1].value);
+		std::string name = tokens.front().value;
+		tokens.pop();
+		identifiers[name] = stringToWord(tokens.front().value);
 		return;
 	}
-	Opcode opcode = stringToOpcode(tokens[i].value);
-	i++;
-	if(i == tokens.size())
+	std::queue<Word> words;
+	Opcode opcode = stringToOpcode(tokens.front().value);
+	tokens.pop();
+	if(tokens.empty())
 	{
-		instructions.push_back(Instruction(opcode, {0x0000}, {0x0000}));
-		values.push_back({});
+		lines.push({{opcode, {0x0000}, {0x0000}}, words});
 		return;
 	}
 	bool indirect = false;
-	ModeType type;
-	if(tokens[i].value == "$")
+	Mode::Type type;
+	if(tokens.front().value == "$")
 	{
 		indirect = true;
-		i++;
+		tokens.pop();
 	}
-	type = stringToModeType(tokens[i].value);
-	i++;
+	type = stringToModeType(tokens.front().value);
+	tokens.pop();
 	Mode A(type, indirect);
-	if(i == tokens.size())
+	if(tokens.empty())
 	{
-		instructions.push_back(Instruction(opcode, A, {0x0000}));
-		values.push_back({});
+		lines.push({{opcode, A, {0x0000}}, words});
 		return;
 	}
-	Word X;
-	if(tokens[i].type == Token::Type::IDENTIFIER)
+	if(tokens.front().type == Token::Type::IDENTIFIER)
 	{
-		X = identifiers.at(tokens[i].value);
-		i++;
+		words.push(identifiers.at(tokens.front().value));
+		tokens.pop();
 	}
-	else if(tokens[i].type == Token::Type::NUMBER)
+	else if(tokens.front().type == Token::Type::NUMBER)
 	{
-		X = stringToWord(tokens[i].value);
-		i++;
+		words.push(stringToWord(tokens.front().value));
+		tokens.pop();
 	}
 	else
 	{
-		X = 0x0000;
+		words.push(0x0000);
 	}
-	if(i == tokens.size())
+	if(tokens.empty())
 	{
-		instructions.push_back(Instruction(opcode, A, {0x0000}));
-		values.push_back({X});
+		lines.push({{opcode, A, {0x0000}}, words});
 		return;
 	}
 	indirect = false;
-	if(tokens[i].value == "$")
+	if(tokens.front().value == "$")
 	{
 		indirect = true;
-		i++;
+		tokens.pop();
 	}
-	type = stringToModeType(tokens[i].value);
-	i++;
+	type = stringToModeType(tokens.front().value);
+	tokens.pop();
 	Mode B(type, indirect);
-	if(i == tokens.size())
+	if(tokens.empty())
 	{
-		instructions.push_back(Instruction(opcode, A, B));
-		values.push_back({X});
+		lines.push({{opcode, A, B}, words});
 		return;
 	}
-	Word Y;
-	if(tokens[i].type == Token::Type::IDENTIFIER)
+	if(tokens.front().type == Token::Type::IDENTIFIER)
 	{
-		Y = identifiers.at(tokens[i].value);
-		i++;
+		words.push(identifiers.at(tokens.front().value));
+		tokens.pop();
 	}
-	else if(tokens[i].type == Token::Type::NUMBER)
+	else if(tokens.front().type == Token::Type::NUMBER)
 	{
-		Y = stringToWord(tokens[i].value);
-		i++;
+		words.push(stringToWord(tokens.front().value));
+		tokens.pop();
 	}
 	else
 	{
-		Y = 0x0000;
+		words.push(0x0000);
 	}
-	if(i == tokens.size())
+	if(tokens.empty())
 	{
-		instructions.push_back(Instruction(opcode, A, B));
-		values.push_back({X, Y});
+		lines.push({{opcode, A, B}, words});
 		return;
 	}
 }
 
-std::vector<Word> Parser::assemble()
+std::queue<Word> Parser::assemble()
 {
-	std::vector<Word> words;
-	for(unsigned i = 0; i < instructions.size(); i++)
+	std::queue<Word> words;
+	while(!lines.empty())
 	{
-		words.push_back(instructions[i].assemble());
-		for(unsigned j = 0; j < values[i].size(); j++)
+		words.push(lines.front().instr.assemble());
+		while(!lines.front().words.empty())
 		{
-			words.push_back(values[i][j]);
+			words.push(lines.front().words.front());
+			lines.front().words.pop();
 		}
+		lines.pop();
 	}
 	return words;
 }
@@ -143,16 +139,16 @@ Opcode Parser::stringToOpcode(std::string string)
 	else throw std::runtime_error("illegal instruction: " + string);
 }
 
-ModeType Parser::stringToModeType(std::string string)
+Mode::Type Parser::stringToModeType(std::string string)
 {
 	stringToLower(string);
-	if(string == "m") return ModeType::M;
-	else if(string == "r") return ModeType::R;
-	else if(string == "h") return ModeType::H;
-	else if(string == "p") return ModeType::P;
-	else if(string == "t") return ModeType::T;
-	else if(string == "s") return ModeType::S;
-	else if(string == "f") return ModeType::F;
+	if(string == "m") return Mode::Type::M;
+	else if(string == "r") return Mode::Type::R;
+	else if(string == "h") return Mode::Type::H;
+	else if(string == "p") return Mode::Type::P;
+	else if(string == "t") return Mode::Type::T;
+	else if(string == "s") return Mode::Type::S;
+	else if(string == "f") return Mode::Type::F;
 	else throw std::runtime_error("illegal mode type: " + string);
 }
 

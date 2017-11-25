@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 
 	for(unsigned i = 0; !words.empty(); i++, words.pop())
 	{
-		bytes[(i * 2) + 0] = static_cast<uint8_t>(words.front() >> 8);
-		bytes[(i * 2) + 1] = static_cast<uint8_t>(words.front());
+		bytes[(i * 2) + 0] = static_cast<uint8_t>(words.front());
+		bytes[(i * 2) + 1] = static_cast<uint8_t>(words.front() >> 8);
 	}
 	output.write(reinterpret_cast<char const *>(bytes), static_cast<std::streamsize>(byteSize));
 	output.close();

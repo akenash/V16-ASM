@@ -148,8 +148,8 @@ Mode::Type Parser::stringToModeType(std::string string)
 	else if(string == "r") return Mode::Type::R;
 	else if(string == "h") return Mode::Type::H;
 	else if(string == "p") return Mode::Type::P;
-	else if(string == "t") return Mode::Type::T;
 	else if(string == "s") return Mode::Type::S;
+	else if(string == "a") return Mode::Type::A;
 	else if(string == "f") return Mode::Type::F;
 	else throw std::runtime_error("illegal mode type: " + string);
 }

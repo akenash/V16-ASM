@@ -14,12 +14,17 @@ void Parser::parse(std::queue<Token> &tokens)
 		identifiers[name] = stringToWord(tokens.front().value);
 		return;
 	}
-	std::queue<Word> words;
+	if(tokens.front().type == Token::Type::NUMBER)
+	{
+		words.push(stringToWord(tokens.front().value));
+		return;
+	}
 	Opcode opcode = stringToOpcode(tokens.front().value);
+	Instruction instr(opcode, {0x0000}, {0x0000});
 	tokens.pop();
 	if(tokens.empty())
 	{
-		lines.push({{opcode, {0x0000}, {0x0000}}, words});
+		words.push(instr.assemble());
 		return;
 	}
 	bool indirect = false;
@@ -32,28 +37,27 @@ void Parser::parse(std::queue<Token> &tokens)
 	type = stringToModeType(tokens.front().value);
 	tokens.pop();
 	Mode A(type, indirect);
+	instr.A = A;
 	if(tokens.empty())
 	{
-		lines.push({{opcode, A, {0x0000}}, words});
+		words.push(instr.assemble());
 		return;
 	}
+	Word X = 0x0000;
 	if(tokens.front().type == Token::Type::IDENTIFIER)
 	{
-		words.push(identifiers.at(tokens.front().value));
+		X = identifiers.at(tokens.front().value);
 		tokens.pop();
 	}
 	else if(tokens.front().type == Token::Type::NUMBER)
 	{
-		words.push(stringToWord(tokens.front().value));
+		X = stringToWord(tokens.front().value);
 		tokens.pop();
-	}
-	else
-	{
-		words.push(0x0000);
 	}
 	if(tokens.empty())
 	{
-		lines.push({{opcode, A, {0x0000}}, words});
+		words.push(instr.assemble());
+		words.push(X);
 		return;
 	}
 	indirect = false;
@@ -65,45 +69,35 @@ void Parser::parse(std::queue<Token> &tokens)
 	type = stringToModeType(tokens.front().value);
 	tokens.pop();
 	Mode B(type, indirect);
+	instr.B = B;
 	if(tokens.empty())
 	{
-		lines.push({{opcode, A, B}, words});
+		words.push(instr.assemble());
+		words.push(X);
 		return;
 	}
+	Word Y = 0x0000;
 	if(tokens.front().type == Token::Type::IDENTIFIER)
 	{
-		words.push(identifiers.at(tokens.front().value));
+		Y = identifiers.at(tokens.front().value);
 		tokens.pop();
 	}
 	else if(tokens.front().type == Token::Type::NUMBER)
 	{
-		words.push(stringToWord(tokens.front().value));
+		Y = stringToWord(tokens.front().value);
 		tokens.pop();
-	}
-	else
-	{
-		words.push(0x0000);
 	}
 	if(tokens.empty())
 	{
-		lines.push({{opcode, A, B}, words});
+		words.push(instr.assemble());
+		words.push(X);
+		words.push(Y);
 		return;
 	}
 }
 
-std::queue<Word> Parser::assemble()
+std::queue<Word> Parser::getWords()
 {
-	std::queue<Word> words;
-	while(!lines.empty())
-	{
-		words.push(lines.front().instr.assemble());
-		while(!lines.front().words.empty())
-		{
-			words.push(lines.front().words.front());
-			lines.front().words.pop();
-		}
-		lines.pop();
-	}
 	return words;
 }
 

@@ -29,15 +29,17 @@ int main(int argc, char *argv[])
 		parser.parse(tokens);
 	}
 	input.close();
-	auto words = parser.assemble();
 	std::ofstream output(outputPath, std::ios::binary);
 	if(!output.good())
 	{
 		std::cout << "couldn't open output file: " << outputPath << "\n";
 		return 1;
 	}
+	auto words = parser.getWords();
+
 	std::size_t byteSize = words.size() * 2;
 	uint8_t *bytes = new uint8_t[byteSize];
+
 	for(unsigned i = 0; !words.empty(); i++, words.pop())
 	{
 		bytes[(i * 2) + 0] = static_cast<uint8_t>(words.front() >> 8);

@@ -9,15 +9,9 @@
 class Parser
 {
 	public:
-	struct Line
-	{
-		Instruction instr;
-		std::queue<Word> words;
-	};
-
 	void parse(std::queue<Token> &tokens);
 
-	std::queue<Word> assemble();
+	std::queue<Word> getWords();
 	private:
 	Opcode stringToOpcode(std::string string);
 	Mode::Type stringToModeType(std::string string);
@@ -25,5 +19,5 @@ class Parser
 	static void stringToLower(std::string &string);
 	static Word stringToWord(std::string const &string);
 	std::unordered_map<std::string, Word> identifiers;
-	std::queue<Line> lines;
+	std::queue<Word> words;
 };

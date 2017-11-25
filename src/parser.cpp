@@ -135,7 +135,8 @@ Opcode Parser::stringToOpcode(std::string string)
 	else if(string == "mul") return MUL;
 	else if(string == "div") return DIV;
 	else if(string == "mod") return MOD;
-	else if(string == "snd") return SND;
+	else if(string == "api") return API;
+	else if(string == "apo") return APO;
 	else throw std::runtime_error("illegal instruction: " + string);
 }
 

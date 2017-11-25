@@ -77,7 +77,7 @@ std::vector<Token> tokenize(std::string const &line)
 				buffer.type = Token::Type::OPCODE;
 				tokens.push_back(buffer);
 			}
-			else if(buffer.type != Token::Type::IRRELEVANT)
+			else if(buffer.type != Token::Type::IRRELEVANT && buffer.value != "")
 			{
 				tokens.push_back(buffer);
 			}

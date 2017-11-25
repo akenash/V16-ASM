@@ -1,23 +1,46 @@
+#include <string>
+#include <fstream>
 #include <iostream>
+#include <cstdint>
+//
 #include <tokenizer.hpp>
+#include <parser.hpp>
 
-int main()
+int main(int argc, char *argv[])
 {
-	auto tokens = tokenize("CPY $P:0x2000  R%PTRREG");
-	for(auto const &i : tokens )
+	if(argc < 3)
 	{
-		std::cout << i.value << ", ";
+		std::cout << "usage: " << argv[0] << " INPUT OUTPUT\n";
+		return 1;
 	}
-	std::cout << "\n";
-	for(auto const &i : tokens )
+	std::string inputPath = argv[1];
+	std::string outputPath = argv[2];
+	std::ifstream input(inputPath);
+	if(!input.good())
 	{
-		switch(i.type)
-		{
-			case Token::Type::IRRELEVANT: std::cout << "I"; break;
-			case Token::Type::NUMBER: std::cout << "N"; break;
-			case Token::Type::MODE: std::cout << "M"; break;
-			case Token::Type::IDENTIFIER: std::cout << "C"; break;
-			case Token::Type::OPCODE: std::cout << "O"; break;
-		}
+		std::cout << "couldn't open input file: " << inputPath << "\n";
+		return 1;
 	}
+	std::string line;
+	Parser parser;
+	while(std::getline(input, line))
+	{
+		parser.parse(tokenize(line));
+	}
+	input.close();
+	auto words = parser.assemble();
+	std::ofstream output(outputPath, std::ios::binary);
+	if(!output.good())
+	{
+		std::cout << "couldn't open output file: " << outputPath << "\n";
+		return 1;
+	}
+	uint8_t *bytes = new uint8_t[words.size() * 2];
+	for(unsigned i = 0; i < words.size(); i++)
+	{
+		bytes[(i * 2) + 0] = static_cast<uint8_t>(words[i] >> 8);
+		bytes[(i * 2) + 1] = static_cast<uint8_t>(words[i]);
+	}
+	output.write(reinterpret_cast<char const *>(bytes), static_cast<long>(words.size()) * 2);
+	output.close();
 }

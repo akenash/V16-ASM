@@ -1,4 +1,4 @@
-TARGET ?= v16-vm
+TARGET ?= v16-asm
 
 BUILD_DIR := build
 SRC_DIR := src

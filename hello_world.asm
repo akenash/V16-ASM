@@ -15,6 +15,4 @@ ADD  M:0x0001  R:0x0000 # add 1 to the binary data iterator
 IGQ $S:0x0007  M:0x0107 # if we copied 7 words, skip the jump
 JMP  S:0x000C           # jump to beginning of copying
 API  M:0x0001  M:0x0001 # send the write signal to console
-API  M:0x0002  M:0x0001 # send the clear (buffer) signal to console
-CPY  M:0x0100 $S:0x0012 # reset the HW iterator
-JMP  S:0x001A           # jump to the beginning of the program
+JMP  S:0x0003           # jump to the beginning of the program

@@ -74,7 +74,7 @@ std::queue<Token> tokenize(std::string const &line)
 			break;
 
 		case CharType::IRRELEVANT:
-			if(tokens.empty() && buffer.value != "")
+			if(tokens.empty() && buffer.value != "" && buffer.type != Token::Type::NUMBER)
 			{
 				buffer.type = Token::Type::OPCODE;
 			}

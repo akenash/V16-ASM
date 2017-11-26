@@ -140,6 +140,7 @@ Mode::Type Parser::stringToModeType(std::string string)
 	stringToLower(string);
 	if(string == "m") return Mode::Type::M;
 	else if(string == "r") return Mode::Type::R;
+	else if(string == "i") return Mode::Type::I;
 	else if(string == "h") return Mode::Type::H;
 	else if(string == "p") return Mode::Type::P;
 	else if(string == "s") return Mode::Type::S;

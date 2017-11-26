@@ -16,7 +16,11 @@ void Parser::parse(std::queue<Token> &tokens)
 	}
 	if(tokens.front().type == Token::Type::NUMBER)
 	{
-		words.push(stringToWord(tokens.front().value));
+		while(!tokens.empty())
+		{
+			words.push(stringToWord(tokens.front().value));
+			tokens.pop();
+		}
 		return;
 	}
 	Opcode opcode = stringToOpcode(tokens.front().value);
